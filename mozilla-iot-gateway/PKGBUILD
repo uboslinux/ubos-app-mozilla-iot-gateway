@@ -1,0 +1,70 @@
+developer=https://iot.mozilla.org/
+url=${developer}
+maintainer=http://indiecomputing.com/
+pkgname=$(basename $(pwd))
+pkgver=0.6.1
+pkgrel=1
+pkgdesc="Mozilla IoT gateway"
+arch=('any')
+license=("custom:${pkgname}")
+source=("mozilla-iot-gateway-${pkgver}.tar.gz::https://github.com/mozilla-iot/gateway/archive/${pkgver}.tar.gz")
+releasepage=('https://github.com/mozilla-iot/gateway/releases')
+depends=(
+    'nodejs'
+)
+makedepends=(
+    'npm'
+    'yarn'
+)
+#    boost-python-devel boost-devel bluez-libs-devel glib2-devel
+# libudev-devel libusb1-devel
+# autoconf
+# libpng-dev
+
+options=('!strip')
+sha512sums=('fdd47dbd07716c5c16d91d0b883f72edc574924ae3747d7904d3029fd7becadade370e7b6b2dae9a101d012a9c15993ba52f5cc1ce7c1c36f78761641d5fbcd1')
+# install=install
+
+# prepare() {
+#     cd ${srcdir}/${pkgname}-${pkgver}
+#   patch -p0 < ${startdir}/upgrade-charlock-holmes.patch
+# }
+
+build() {
+    cd ${srcdir}/gateway-${pkgver}
+    rm package-lock.json # avoid warning about inconsistent package managers
+    yarn
+}
+
+package() {
+# Manifest
+    install -D -m0644 ${startdir}/ubos-manifest.json ${pkgdir}/ubos/lib/ubos/manifests/${pkgname}.json
+
+# Icons
+    install -D -m0644 ${startdir}/appicons/{72x72,144x144}.png -t ${pkgdir}/ubos/http/_appicons/${pkgname}/
+
+# Templates
+    install -D -m0644 ${startdir}/tmpl/*.tmpl -t ${pkgdir}/ubos/share/${pkgname}/tmpl/
+
+# Config files
+    mkdir -p ${pkgdir}/etc/${pkgname}
+
+# Systemd
+    install -D -m0644 ${startdir}/systemd/*.{service,target} -t ${pkgdir}/usr/lib/systemd/system/
+    install -D -m0644 ${startdir}/sysusers.d/mastodon.conf   -t ${pkgdir}/usr/lib/sysusers.d/
+
+# Data
+    mkdir -p ${pkgdir}/ubos/lib/${pkgname}
+
+# Cache
+    mkdir -p ${pkgdir}/var/cache/mastodon
+
+# Code
+    install -D -m0755 ${startdir}/bin/* -t ${pkgdir}/ubos/share/${pkgname}/bin/
+    mkdir -p ${pkgdir}/ubos/share/${pkgname}/mastodon
+    cp -a ${srcdir}/${pkgname}-${pkgver}/*       ${pkgdir}/ubos/share/${pkgname}/mastodon/
+    cp -a ${srcdir}/${pkgname}-${pkgver}/.bundle ${pkgdir}/ubos/share/${pkgname}/mastodon/
+
+# Add UBOS rake tasks
+    install -m644 ${startdir}/ubos.rake ${pkgdir}/ubos/share/${pkgname}/mastodon/lib/tasks/ubos.rake
+}
