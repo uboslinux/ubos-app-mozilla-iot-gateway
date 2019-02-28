@@ -1,0 +1,19 @@
+[Unit]
+Description=Mozilla IoT Gateway Client
+After=network.target
+# OnFailure=mozilla-iot-gateway.update-rollback.service
+
+[Service]
+Type=simple
+StandardOutput=journal
+StandardError=journal
+User=mozilla-iot-gateway
+WorkingDirectory=/ubos/lib/mozilla-iot-gateway
+
+FIXME:
+ExecStart=/home/pi/mozilla-iot/gateway/run-app.sh
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

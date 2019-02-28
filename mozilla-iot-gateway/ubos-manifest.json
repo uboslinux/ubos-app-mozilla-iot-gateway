@@ -1,0 +1,6 @@
+
+
+
+
+default adapters: thing-url, zigbee, zwave
+default addon: python

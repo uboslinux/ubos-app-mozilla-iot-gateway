@@ -1,70 +1,127 @@
+# See also https://github.com/mozilla-iot/gateway-docker/blob/master/Dockerfile
 developer=https://iot.mozilla.org/
 url=${developer}
-maintainer=http://indiecomputing.com/
+maintainer=https://indiecomputing.com/
 pkgname=$(basename $(pwd))
-pkgver=0.6.1
+pkgver=0.7.0
 pkgrel=1
+_adapt_parser_ver=0.3.2
+
 pkgdesc="Mozilla IoT gateway"
 arch=('any')
 license=("custom:${pkgname}")
-source=("mozilla-iot-gateway-${pkgver}.tar.gz::https://github.com/mozilla-iot/gateway/archive/${pkgver}.tar.gz")
-releasepage=('https://github.com/mozilla-iot/gateway/releases')
-depends=(
-    'nodejs'
+source=(
+    "mozilla-iot-gateway-${pkgver}.tar.gz::https://github.com/mozilla-iot/gateway/archive/${pkgver}.tar.gz"
+    "adapt-parser-${_adapt_parser_ver}.tar.gz::https://github.com/MycroftAI/adapt/archive/release/v${_adapt_parser_ver}.tar.gz"
+    "git+https://github.com/mozilla-iot/intent-parser"
 )
+
+
+# _url="git+https://github.com/mycroftai/adapt#egg=adapt-parser"
+# sudo pip3 install "$_url"
+# git clone https://github.com/mozilla-iot/intent-parser "$HOME/mozilla-iot/intent-parser"
+
+
+releasepage=('https://github.com/mozilla-iot/gateway/releases')
 makedepends=(
+    'nvm'
     'npm'
     'yarn'
-)
 #    boost-python-devel boost-devel bluez-libs-devel glib2-devel
 # libudev-devel libusb1-devel
 # autoconf
 # libpng-dev
+)
+depends=(
+    # Does not depend on the UBOS nodejs package
+    'python'
+
+# upstream:
+#   autoconf \
+#   dnsmasq \
+#   ffmpeg \
+#   git \
+#   hostapd \
+#   libboost-python-dev \
+#   libboost-thread-dev \
+#   libbluetooth-dev \
+#   libffi-dev \
+#   libglib2.0-dev \
+#   libnanomsg-dev \
+#   libnanomsg4 \
+#   libtool \
+#   libudev-dev \
+#   libusb-1.0-0-dev \
+#   policykit-1 \
+#   python-pip \
+#   python3-pip \
+#   sqlite3
+)
 
 options=('!strip')
-sha512sums=('fdd47dbd07716c5c16d91d0b883f72edc574924ae3747d7904d3029fd7becadade370e7b6b2dae9a101d012a9c15993ba52f5cc1ce7c1c36f78761641d5fbcd1')
-# install=install
+sha512sums=('f194ba76c9807b828342c6b0b49b0aba5ec661f8a6b093aaa3c2ac5f0c6cb6ef8e56d507641ed8182aa34085b3e54beb0a0c1e8f8048c5b8e0e294dbfcefe503'
+            'f9bd258a78905cd7cda001de071fe53620494993d1d3bb8ab473c918d5a4d55a7441e8d483f993972dcc07e9a9bbb82a8ba12175ceb205f0bd881ee187ad1918'
+            'SKIP')
 
-# prepare() {
-#     cd ${srcdir}/${pkgname}-${pkgver}
-#   patch -p0 < ${startdir}/upgrade-charlock-holmes.patch
-# }
+install=install
+
+# FIXME:
+# * The further-down invocation of `node-gyp` should be replaced with `node-gyp --devdir <dir>`
+#   where `<dir>` is someplace inside `src/`, so it gets deleted for clean builds
+# * See https://github.com/mozilla-iot/gateway/issues/1507
+
+# Use NVM
+. /usr/share/nvm/init-nvm.sh
+
+prepare() {
+    NODE_VERSION="--lts=carbon"
+
+    cd ${srcdir}/gateway-${pkgver}
+    NVM_DIR=$(pwd)/.nvm nvm install ${NODE_VERSION}
+}
 
 build() {
     cd ${srcdir}/gateway-${pkgver}
-    rm package-lock.json # avoid warning about inconsistent package managers
-    yarn
+
+    export NVM_DIR=$(pwd)/.nvm
+
+    mv package-lock.json package-lock.org.json # avoid warning about inconsistent package managers
+
+    [[ -e .yarnrc ]] || touch .yarnrc # Attempt to use local file; not sure this works
+
+    # From https://github.com/mozilla-iot/gateway/blob/4659f4fef17f5ae184634cfc4ac89a67b04ba1a8/image/build-gateway.sh
+
+    yarn --ignore-scripts
+    npm rebuild
+    node_modules/.bin/webpack
+
+    yarn --ignore-scripts --production
+    npm rebuild
 }
+
 
 package() {
 # Manifest
     install -D -m0644 ${startdir}/ubos-manifest.json ${pkgdir}/ubos/lib/ubos/manifests/${pkgname}.json
 
 # Icons
-    install -D -m0644 ${startdir}/appicons/{72x72,144x144}.png -t ${pkgdir}/ubos/http/_appicons/${pkgname}/
+    # install -D -m0644 ${startdir}/appicons/{72x72,144x144}.png -t ${pkgdir}/ubos/http/_appicons/${pkgname}/
 
 # Templates
-    install -D -m0644 ${startdir}/tmpl/*.tmpl -t ${pkgdir}/ubos/share/${pkgname}/tmpl/
+    # install -D -m0644 ${startdir}/tmpl/*.tmpl -t ${pkgdir}/ubos/share/${pkgname}/tmpl/
 
 # Config files
-    mkdir -p ${pkgdir}/etc/${pkgname}
-
-# Systemd
-    install -D -m0644 ${startdir}/systemd/*.{service,target} -t ${pkgdir}/usr/lib/systemd/system/
-    install -D -m0644 ${startdir}/sysusers.d/mastodon.conf   -t ${pkgdir}/usr/lib/sysusers.d/
-
-# Data
-    mkdir -p ${pkgdir}/ubos/lib/${pkgname}
-
-# Cache
-    mkdir -p ${pkgdir}/var/cache/mastodon
+    # mkdir -p ${pkgdir}/etc/${pkgname}
 
 # Code
-    install -D -m0755 ${startdir}/bin/* -t ${pkgdir}/ubos/share/${pkgname}/bin/
-    mkdir -p ${pkgdir}/ubos/share/${pkgname}/mastodon
-    cp -a ${srcdir}/${pkgname}-${pkgver}/*       ${pkgdir}/ubos/share/${pkgname}/mastodon/
-    cp -a ${srcdir}/${pkgname}-${pkgver}/.bundle ${pkgdir}/ubos/share/${pkgname}/mastodon/
+    # MOZILLA_IOT_DIR
+    mkdir -p -m0755 ${pkgdir}/ubos/share/${pkgname}
+    cp -a ${srcdir}/gateway-${pkgver}/* ${pkgdir}/ubos/share/${pkgname}/
 
-# Add UBOS rake tasks
-    install -m644 ${startdir}/ubos.rake ${pkgdir}/ubos/share/${pkgname}/mastodon/lib/tasks/ubos.rake
+    # Same as MOZILLA_IOT_PROFILE (FIXME?)
+    mkdir -p -m0755 ${pkgdir}/ubos/share/${pkgname}/addons
+    (cd ${srcdir}/adapt-release-v${_adapt_parser_ver} ; python2 setup.py install --root="${pkgdir}/" )
+
+    cp -a ${srcdir}/intent-parser ${pkgdir}/ubos/share/${pkgname}/addons/
 }
+

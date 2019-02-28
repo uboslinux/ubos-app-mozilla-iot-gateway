@@ -1,0 +1,28 @@
+developer="https://iot.mozilla.org/"
+maintainer="http://indiecomputing.com/"
+pkgname=$(basename $(pwd))
+pkgver=0.5.0
+pkgrel=1
+pkgdesc='Z-Wave adapter add-on for Mozilla IoT Gateway'
+arch=('any')
+url='https://github.com/mozilla-iot/zwave-adapter'
+license=("MPL2")
+depends=('openzwave' 'nodejs-lts-carbon')
+makedepends=('yarn')
+source=(
+    "${pkgname}-${pkgver}.tar.gz::https://github.com/mozilla-iot/zwave-adapter/archive/v${pkgver}.tar.gz"
+)
+releasepage=('https://github.com/mozilla-iot/zwave-adapter/releases')
+sha512sums=('8553f44ed4fa51a1266cadae7aea2dc31d801be48688e6528107fbb03b447ef9038e1d07bad55b28b383e5d94c7186015fc13958510164e9c6f05178718efcbf')
+
+package() {
+    cd "${srcdir}/zwave-adapter-${pkgver}"
+    # from package.sh
+
+    # Make the C++ symbols be backwards compatible with gcc versions
+    # prior to 5.1. In particular, the openzwave library suffers
+    # from this problem.
+    # export CXXFLAGS=-D_GLIBCXX_USE_CXX11_ABI=0
+
+    yarn install --production
+}
