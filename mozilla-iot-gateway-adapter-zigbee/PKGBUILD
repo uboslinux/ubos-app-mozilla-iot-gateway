@@ -1,0 +1,32 @@
+developer="https://iot.mozilla.org/"
+maintainer="http://indiecomputing.com/"
+pkgname=$(basename $(pwd))
+pkgver=0.4.0
+pkgrel=1
+pkgdesc='Zigbee adapter add-on for Mozilla IoT Gateway'
+arch=('any')
+url='https://github.com/mozilla-iot/zigbee-adapter'
+license=("MPL2")
+depends=('nodejs-lts-carbon')
+makedepends=('yarn')
+source=(
+    "${pkgname}-${pkgver}.tar.gz::https://github.com/mozilla-iot/zigbee-adapter/archive/v${pkgver}.tar.gz"
+)
+releasepage=('https://github.com/mozilla-iot/zigbee-adapter/releases')
+options=('!strip')
+sha512sums=('938532d63f1302c98f914cd230b6280d473089984734ab3b04dfba63567aa72cfb419a20cbb6bfe71857e2039f8e8995f805c52b3a127fa6662fd108b624acf1')
+
+package() {
+    cd "${srcdir}/zigbee-adapter-${pkgver}"
+
+    yarn --ignore-scripts --production
+
+    TARFILE="$(npm pack)"
+
+    mkdir -p 0755 ${pkgdir}/ubos/share/${pkgname}
+    tar xfz $TARFILE -C ${pkgdir}/ubos/share/${pkgname}
+    mv ${pkgdir}/ubos/share/mozilla-iot-gateway-adapter-zigbee/package/* ${pkgdir}/ubos/share/mozilla-iot-gateway-adapter-zigbee/
+    rmdir ${pkgdir}/ubos/share/mozilla-iot-gateway-adapter-zigbee/package
+
+    cp -a node_modules ${pkgdir}/ubos/share/${pkgname}/
+}
