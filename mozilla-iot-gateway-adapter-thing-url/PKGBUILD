@@ -1,0 +1,25 @@
+developer="https://iot.mozilla.org/"
+maintainer="http://indiecomputing.com/"
+pkgname=$(basename $(pwd))
+pkgver=0.2.1
+pkgrel=1
+pkgdesc='Proxy adapter for WoT API endpoints for Mozilla IoT Gateway'
+arch=('any')
+url='https://github.com/mozilla-iot/thing-url-adapter'
+license=("MPL2")
+depends=('yarn')
+source=(
+    "${pkgname}-${pkgver}.tar.gz::https://github.com/mozilla-iot/thing-url-adapter/archive/v${pkgver}.tar.gz"
+)
+releasepage=('https://github.com/mozilla-iot/thing-url-adapter/releases')
+options=('!strip')
+sha512sums=('2970208cafc10ebb392697d9fe0e7adc52643ff52b8025b30dcb79aaf178df8acead8b2deb0db4fa436273a091705627efe5fe1e3a0cbde8643398ac611cf0db')
+
+package() {
+    cd "${srcdir}/thing-url-adapter-${pkgver}"
+
+    yarn --ignore-scripts --production
+
+    install -D -m0755 package.json index.js thing-url-adapter.js -t ${pkgdir}/ubos/share/${pkgname}/
+    cp -a node_modules ${pkgdir}/ubos/share/${pkgname}/
+}
