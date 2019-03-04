@@ -1,0 +1,19 @@
+#
+# Copyright (C) 2018 and later, Indie Computing Corp. All rights reserved. License: see package.
+#
+
+ProxyPass /robots.txt !
+ProxyPass /favicon.ico !
+ProxyPass /sitemap.xml !
+ProxyPass /.well-known !
+ProxyPass /_common !
+ProxyPass /_errors !
+
+ProxyPass ${appconfig.contextorslash} http://127.0.0.1:8080${appconfig.contextorslash}
+ProxyPassReverse ${appconfig.contextorslash} http://127.0.0.1:8080${appconfig.contextorslash}
+ProxyPassReverseCookieDomain 127.0.0.1 ${site.hostname}
+
+ProxyPreserveHost On
+
+RequestHeader set X-Forwarded-Proto "${site.protocol}"
+RequestHeader set X-Frame-Options SAMEORIGIN

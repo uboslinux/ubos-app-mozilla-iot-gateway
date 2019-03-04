@@ -7,7 +7,8 @@ pkgdesc='Proxy adapter for WoT API endpoints for Mozilla IoT Gateway'
 arch=('any')
 url='https://github.com/mozilla-iot/thing-url-adapter'
 license=("MPL2")
-depends=('yarn')
+depends=('mozilla-iot-gateway')
+makedepends=('yarn')
 source=(
     "${pkgname}-${pkgver}.tar.gz::https://github.com/mozilla-iot/thing-url-adapter/archive/v${pkgver}.tar.gz"
 )

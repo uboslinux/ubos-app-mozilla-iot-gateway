@@ -7,7 +7,7 @@ pkgdesc='Python bindings for developing add-ons for Mozilla IoT Gateway'
 arch=('any')
 url='https://github.com/mozilla-iot/gateway-addon-python'
 license=("MPL2")
-depends=('python2')
+depends=('python' 'mozilla-iot-gateway')
 source=(
     "${pkgname}-${pkgver}.tar.gz::https://github.com/mozilla-iot/gateway-addon-python/archive/v${pkgver}.tar.gz"
 )
@@ -16,5 +16,5 @@ sha512sums=('5811486dd8faf8a2fb959850cc35be72cb15690ec4f87164e059ab9427f8b27a0e4
 
 package() {
     cd "${srcdir}/gateway-addon-python-${pkgver}"
-    python2 setup.py install --root="${pkgdir}/"
+    python setup.py install --root="${pkgdir}/"
 }

@@ -1,6 +1,53 @@
+{
+    "type" : "app",
 
+    "appinfo" : {
+        "defaultaccessoryids" : [
+            "mozilla-iot-gateway-adapter-thing-url",
+            "mozilla-iot-gateway-adapter-zigbee",
+            "mozilla-iot-gateway-adapter-zwave",
+            "mozilla-iot-gateway-addon-python"
+        ]
+    },
 
+    "roles" : {
+        "apache2" : {
+            "fixedcontext" : "",
+            "apache2modules" : [
+                "headers",
+                "proxy",
+                "proxy_http",
+                "rewrite"
+            ],
 
-
-default adapters: thing-url, zigbee, zwave
-default addon: python
+            "appconfigitems" : [
+                {
+                    "type"         : "file",
+                    "name"         : "${appconfig.apache2.appconfigfragmentfile}",
+                    "template"     : "tmpl/htaccess.tmpl",
+                    "templatelang" : "varsubst"
+                },
+                {
+                    "type"         : "directory",
+                    "name"         : "${appconfig.datadir}",
+                    "uname"        : "river",
+                    "gname"        : "river"
+                },
+                {
+                    "type"         : "directory",
+                    "name"         : "${appconfig.datadir}/data",
+                    "uname"        : "river",
+                    "gname"        : "river"
+                },
+                {
+                    "type"         : "systemd-service",
+                    "name"         : "mozilla-iot-gateway",
+                },
+                {
+                    "type"         : "systemd-service",
+                    "name"         : "mozilla-iot-gateway.intent-parser",
+                }
+            ]
+        }
+    }
+}

@@ -7,7 +7,7 @@ pkgdesc='Z-Wave adapter add-on for Mozilla IoT Gateway'
 arch=('any')
 url='https://github.com/mozilla-iot/zwave-adapter'
 license=("MPL2")
-depends=('openzwave' 'nodejs-lts-carbon')
+depends=('openzwave' 'mozilla-iot-gateway')
 makedepends=('yarn')
 source=(
     "${pkgname}-${pkgver}.tar.gz::https://github.com/mozilla-iot/zwave-adapter/archive/v${pkgver}.tar.gz"
