@@ -10,10 +10,8 @@ StandardError=journal
 User=mozilla-iot-gateway
 WorkingDirectory=/ubos/share/mozilla-iot-gateway
 
-# ExecStart=/home/pi/mozilla-iot/gateway/run-app.sh
+ExecStart=/ubos/share/mozilla-iot-gateway/nvm/versions/node/v8.15.1/bin/node build/gateway.js
 
-Environment=NVM_DIR=/ubos/share/mozilla-iot-gateway/nvm
-ExecStart=/usr/bin/npm run run-only
 Restart=always
 RestartSec=10s
 

@@ -16,24 +16,18 @@ source=(
     "git+https://github.com/mozilla-iot/intent-parser"
 )
 
-# _url="git+https://github.com/mycroftai/adapt#egg=adapt-parser"
-# sudo pip3 install "$_url"
-# git clone https://github.com/mozilla-iot/intent-parser "$HOME/mozilla-iot/intent-parser"
-
-
 releasepage=('https://github.com/mozilla-iot/gateway/releases')
 makedepends=(
+    'nvm'
     'yarn'
-#    boost-python-devel boost-devel bluez-libs-devel glib2-devel
-# libudev-devel libusb1-devel
-# autoconf
-# libpng-dev
+    'python-pip'
+# boost-python-devel boost-devel bluez-libs-devel glib2-devel
+# libudev-devel libusb1-devel autoconf libpng-dev
 )
 depends=(
     # Does not depend on the UBOS nodejs package
-    'nvm'
-    'npm'
     'python'
+    'python-six'
 
 # upstream:
 #   autoconf \
@@ -70,6 +64,8 @@ install=install
 # * See https://github.com/mozilla-iot/gateway/issues/1507
 
 # Use NVM
+# Note: NVM_DIR must be an absolute path name without a trailing slash, otherwise
+# you get some error message about "not compatible ... 'prefix' option" (don't ask me)
 . /usr/share/nvm/init-nvm.sh
 
 prepare() {
@@ -115,7 +111,8 @@ package() {
 # Systemd
     install -D -m0644 ${startdir}/systemd/*.service -t ${pkgdir}/usr/lib/systemd/system/
 
-    install -D -m0644 ${startdir}/systemd/sysusers ${pkgdir}/usr/lib/sysusers.d/mozilla-iot-gateway.conf
+    install -D -m0644 ${startdir}/systemd/sysusers.conf ${pkgdir}/usr/lib/sysusers.d/${pkgname}.conf
+    install -D -m0644 ${startdir}/systemd/tmpfiles.conf ${pkgdir}/usr/lib/tmpfiles.d/${pkgname}.conf
 
 # Config files
     # mkdir -p ${pkgdir}/etc/${pkgname}
@@ -130,5 +127,9 @@ package() {
     (cd ${srcdir}/adapt-release-v${_adapt_parser_ver} ; python2 setup.py install --root="${pkgdir}/" )
 
     cp -a ${srcdir}/intent-parser ${pkgdir}/ubos/share/${pkgname}/addons/
-}
 
+# adapt
+    cd "${srcdir}/adapt-release-v${_adapt_parser_ver}"
+    pip install .    --root="${pkgdir}/"
+    pip install pyee --root="${pkgdir}/"
+}

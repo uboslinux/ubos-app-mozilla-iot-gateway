@@ -9,10 +9,10 @@ StandardOutput=journal
 StandardError=journal
 User=mozilla-iot-gateway
 
-WorkingDirectory=/ubos/lib/mozilla-iot-gateway/intent-parser
+WorkingDirectory=/ubos/share/mozilla-iot-gateway/addons/intent-parser
 
-FIXME:
-ExecStart=/home/pi/mozilla-iot/intent-parser/intent-parser-server.py
+ExecStart=/usr/bin/python /ubos/share/mozilla-iot-gateway/addons/intent-parser/intent-parser-server.py
+
 Restart=always
 RestartSec=10s
 
