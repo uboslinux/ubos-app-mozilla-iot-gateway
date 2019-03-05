@@ -8,10 +8,12 @@ Type=simple
 StandardOutput=journal
 StandardError=journal
 User=mozilla-iot-gateway
-WorkingDirectory=/ubos/lib/mozilla-iot-gateway
+WorkingDirectory=/ubos/share/mozilla-iot-gateway
 
-FIXME:
-ExecStart=/home/pi/mozilla-iot/gateway/run-app.sh
+# ExecStart=/home/pi/mozilla-iot/gateway/run-app.sh
+
+Environment=NVM_DIR=/ubos/share/mozilla-iot-gateway/nvm
+ExecStart=/usr/bin/npm run run-only
 Restart=always
 RestartSec=10s
 

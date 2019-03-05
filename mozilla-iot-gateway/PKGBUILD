@@ -16,7 +16,6 @@ source=(
     "git+https://github.com/mozilla-iot/intent-parser"
 )
 
-
 # _url="git+https://github.com/mycroftai/adapt#egg=adapt-parser"
 # sudo pip3 install "$_url"
 # git clone https://github.com/mozilla-iot/intent-parser "$HOME/mozilla-iot/intent-parser"
@@ -24,8 +23,6 @@ source=(
 
 releasepage=('https://github.com/mozilla-iot/gateway/releases')
 makedepends=(
-    'nvm'
-    'npm'
     'yarn'
 #    boost-python-devel boost-devel bluez-libs-devel glib2-devel
 # libudev-devel libusb1-devel
@@ -34,6 +31,8 @@ makedepends=(
 )
 depends=(
     # Does not depend on the UBOS nodejs package
+    'nvm'
+    'npm'
     'python'
 
 # upstream:
@@ -77,13 +76,13 @@ prepare() {
     NODE_VERSION="--lts=carbon"
 
     cd ${srcdir}/gateway-${pkgver}
-    NVM_DIR=$(pwd)/.nvm nvm install ${NODE_VERSION}
+    NVM_DIR=$(pwd)/nvm nvm install ${NODE_VERSION}
 }
 
 build() {
     cd ${srcdir}/gateway-${pkgver}
 
-    export NVM_DIR=$(pwd)/.nvm
+    export NVM_DIR=$(pwd)/nvm
 
     mv package-lock.json package-lock.org.json # avoid warning about inconsistent package managers
 
@@ -107,8 +106,16 @@ package() {
 # Icons
     # install -D -m0644 ${startdir}/appicons/{72x72,144x144}.png -t ${pkgdir}/ubos/http/_appicons/${pkgname}/
 
+# Data directory
+    mkdir -p ${pkgdir}/ubos/lib/${pkgname}
+
 # Templates
-    # install -D -m0644 ${startdir}/tmpl/*.tmpl -t ${pkgdir}/ubos/share/${pkgname}/tmpl/
+    install -D -m0644 ${startdir}/tmpl/*.tmpl -t ${pkgdir}/ubos/share/${pkgname}/tmpl/
+
+# Systemd
+    install -D -m0644 ${startdir}/systemd/*.service -t ${pkgdir}/usr/lib/systemd/system/
+
+    install -D -m0644 ${startdir}/systemd/sysusers ${pkgdir}/usr/lib/sysusers.d/mozilla-iot-gateway.conf
 
 # Config files
     # mkdir -p ${pkgdir}/etc/${pkgname}

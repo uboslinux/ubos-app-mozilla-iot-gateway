@@ -30,14 +30,14 @@
                 {
                     "type"         : "directory",
                     "name"         : "${appconfig.datadir}",
-                    "uname"        : "river",
-                    "gname"        : "river"
+                    "uname"        : "mozilla-iot-gateway",
+                    "gname"        : "mozilla-iot-gateway"
                 },
                 {
                     "type"         : "directory",
                     "name"         : "${appconfig.datadir}/data",
-                    "uname"        : "river",
-                    "gname"        : "river"
+                    "uname"        : "mozilla-iot-gateway",
+                    "gname"        : "mozilla-iot-gateway"
                 },
                 {
                     "type"         : "systemd-service",
